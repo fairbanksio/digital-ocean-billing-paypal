@@ -1,2 +1,9 @@
 # digital-ocean-billing-paypal
- Automated Digital Ocean billing via PayPal
+
+Automated DigitalOcean billing via PayPal
+
+### Usage
+
+```
+go run main.go -auth <DIGITAL OCEAN TOKEN>
+```
