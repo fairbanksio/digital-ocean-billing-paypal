@@ -7,23 +7,22 @@ import (
     "log"
     "io/ioutil"
     "encoding/json"
-    "flag"
     "github.com/plutov/paypal/v4"
     "os"
     "context"
     "strconv"
+    "github.com/joho/godotenv"
 )
 
 
 
 func get_digitalocean_balance() string {
-    auth := flag.String("auth", "xxxxxxxxxxxxx", "DigitalOcean API Key")
-    flag.Parse()
-    auth_value := "Bearer " + *auth
-
+    auth_header := "Bearer " + os.Getenv("AUTH")
     client := &http.Client{}
     req, err := http.NewRequest("GET", "https://api.digitalocean.com/v2/customers/my/balance", nil)
-    req.Header.Set("Authorization", auth_value)
+    req.Header.Set("Authorization", auth_header)
+
+    // Send the request
     res, err := client.Do(req)
 
     if err != nil {
@@ -32,6 +31,7 @@ func get_digitalocean_balance() string {
         
     resp, _ := ioutil.ReadAll( res.Body )
     res.Body.Close()
+
     //fmt.Printf("%s\n\n", resp) // Uncomment to see the complete API response
 
     type Result struct {
@@ -47,20 +47,33 @@ func get_digitalocean_balance() string {
 
 func bill_with_paypal() {
     // Create a client instance
-    c, err := paypal.NewClient("clientID", "secretID", paypal.APIBaseSandBox)
+    c, err := paypal.NewClient(os.Getenv("CLIENT"), os.Getenv("SECRET"), paypal.APIBaseSandBox)
     c.SetLog(os.Stdout) // Set log to terminal stdout
 
     accessToken, err := c.GetAccessToken(context.Background())
-    fmt.Println(accessToken)
+    //fmt.Println(accessToken)
 
     if err != nil {
 		log.Fatal( err )
-	}
+	} else if accessToken != nil {
+        plans, err := c.ListBillingPlans(context.Background(), paypal.BillingPlanListParams{})
+        if err != nil {
+            log.Fatal( err )
+        } else if plans != nil {
+            fmt.Println(plans)
+        }
+    }
     
     return
 }
 
 func main() {
+    err := godotenv.Load()
+
+    if err != nil {
+        log.Fatalf("Error loading .env file")
+    }
+
     fmt.Println("Starting DigitalOcean billing...\n")
 
     // Understand the billing cycle
