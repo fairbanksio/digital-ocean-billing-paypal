@@ -53,8 +53,8 @@ func bill_with_paypal() {
 	//fmt.Println(accessToken)
 
 	lp := paypal.ListParams{
-		Page:     "10",
-		PageSize: "5",
+		Page:     "1",
+		PageSize: "25",
 	}
 
 	bplp := paypal.BillingPlanListParams{
