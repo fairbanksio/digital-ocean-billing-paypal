@@ -31,7 +31,7 @@ func get_digitalocean_balance() string {
 	resp, _ := ioutil.ReadAll(res.Body)
 	res.Body.Close()
 
-	//fmt.Printf("%s\n\n", resp) // Uncomment to see the complete API response
+	fmt.Printf("%s\n\n", resp) // Uncomment to see the complete API response
 
 	type Result struct {
 		Balance   string `json:"month_to_date_balance"`
@@ -54,7 +54,7 @@ func bill_with_paypal() {
 
 	lp := paypal.ListParams{
 		Page:     "1",
-		PageSize: "25",
+		PageSize: "20",
 	}
 
 	bplp := paypal.BillingPlanListParams{
@@ -94,7 +94,11 @@ func main() {
 
 	// Get outstanding DigitalOcean balance
 	total_balance := get_digitalocean_balance()
-	fmt.Printf("Total Balance: $%s\n", total_balance)
+	if(total_balance == "") {
+		log.Fatalf("Unable to get DigitalOcean balance\n\n")
+	} else {
+		fmt.Printf("Total Balance: $%s\n", total_balance)
+	}
 
 	// Divide out the bill (total due / total users)
 	var balance_due, _ = strconv.ParseFloat(total_balance, 10) // TO DO: This probably shouldn't be hardcoded to 2
